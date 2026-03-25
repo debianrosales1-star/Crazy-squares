@@ -3,51 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crazy Squares Ultra - Fixed</title>
+    <title>Crazy Squares Ultra</title>
     <style>
         :root { --neon: #00d4ff; --gold: #ffcc00; --red: #ff4444; }
         body { background: #050510; color: white; font-family: 'Arial Black', sans-serif; margin: 0; overflow: hidden; touch-action: none; }
-        
-        #cartera {
-            position: fixed; top: 15px; right: 15px; z-index: 5000;
-            background: rgba(0,0,0,0.8); padding: 10px 20px;
-            border: 3px solid var(--gold); border-radius: 12px; font-size: 1.5rem; color: var(--gold);
-        }
-
-        #reloj {
-            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 5000; font-size: 2.5rem; color: var(--red); display: none; text-shadow: 0 0 15px red;
-        }
-
-        .pantalla {
-            position: fixed; inset: 0; background: #050510;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 4000;
-        }
-        .panel {
-            border: 5px solid var(--neon); padding: 30px; border-radius: 25px;
-            text-align: center; background: #000; box-shadow: 0 0 40px var(--neon); width: 280px;
-        }
-        
-        button {
-            display: block; width: 100%; padding: 15px; margin: 10px 0;
-            font-size: 1.2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 12px;
-            text-transform: uppercase;
-        }
+        #cartera { position: fixed; top: 15px; right: 15px; z-index: 5000; background: rgba(0,0,0,0.8); padding: 10px 20px; border: 3px solid var(--gold); border-radius: 12px; font-size: 1.5rem; color: var(--gold); }
+        #reloj { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 5000; font-size: 2.5rem; color: var(--red); display: none; text-shadow: 0 0 15px red; }
+        .pantalla { position: fixed; inset: 0; background: #050510; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 4000; }
+        .panel { border: 5px solid var(--neon); padding: 30px; border-radius: 25px; text-align: center; background: #000; box-shadow: 0 0 40px var(--neon); width: 280px; }
+        button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 1.2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 12px; text-transform: uppercase; }
         .f { background: #44ff44; } .m { background: #ffee58; } .d { background: #ff4444; }
         .gris { background: #444; color: white; }
-
-        #hud {
-            position: fixed; top: 0; left: 0; width: 100%; height: 85px;
-            background: rgba(0,0,0,0.8); display: none; align-items: center; padding-left: 20px; z-index: 1000;
-        }
+        #hud { position: fixed; top: 0; left: 0; width: 100%; height: 85px; background: rgba(0,0,0,0.8); display: none; align-items: center; padding-left: 20px; z-index: 1000; }
         canvas { display: none; background: #000; }
     </style>
 </head>
 <body>
-
     <div id="cartera">💰 $<span id="val-monedas">0</span></div>
     <div id="reloj">30s</div>
-
     <div id="menu-inicio" class="pantalla">
         <div class="panel">
             <button class="gris" onclick="cambiarIdioma()" id="btn-lang" style="font-size: 0.8rem;">IDIOMA: ESPAÑOL</button>
@@ -58,144 +31,25 @@
             <button class="gris" style="background:var(--gold); color:black;" onclick="abrirTienda()" id="txt-t">🛒 TIENDA</button>
         </div>
     </div>
-
     <div id="pantalla-tienda" class="pantalla" style="display:none; z-index: 6000;">
-        <div class="panel" style="border-color: var(--gold);">
-            <h1 style="color:var(--gold)" id="tit-tienda">TIENDA</h1>
-            <p id="desc-tienda">MODO DIOS: $1000</p>
-            <button class="f" onclick="alert('No money')" id="btn-comprar">COMPRAR</button>
-            <button class="gris" onclick="cerrarTienda()" id="btn-volver">VOLVER</button>
-        </div>
+        <div class="panel" style="border-color: var(--gold);"><h1 style="color:var(--gold)" id="tit-tienda">TIENDA</h1><p id="desc-tienda">MODO DIOS: $1000</p><button class="f" onclick="alert('No money')" id="btn-comprar">COMPRAR</button><button class="gris" onclick="cerrarTienda()" id="btn-volver">VOLVER</button></div>
     </div>
-
-    <div id="hud">
-        <div id="objetivo" style="width:45px; height:45px; border:3px solid white; margin-right:15px;"></div>
-        <div style="text-align:left">
-            <span id="txt-obj" style="font-size:0.8rem; color:#aaa;">OBJETIVO</span>
-            <span id="t-puntos" style="font-size:1.8rem; font-weight:bold;">0 / 10</span>
-        </div>
-    </div>
-
+    <div id="hud"><div id="objetivo" style="width:45px; height:45px; border:3px solid white; margin-right:15px;"></div><div style="text-align:left"><span id="txt-obj" style="font-size:0.8rem; color:#aaa;">OBJETIVO</span><span id="t-puntos" style="font-size:1.8rem; font-weight:bold;">0 / 10</span></div></div>
     <canvas id="mundo"></canvas>
-
     <script>
-        const canvas = document.getElementById("mundo");
-        const ctx = canvas.getContext("2d");
-        
-        let monedas = parseInt(localStorage.getItem("cs_final_v5")) || 0;
-        let lang = "es";
-        let activo = false;
-        let cubos = [];
-        let colorMeta = "";
-        let pts = 0, meta = 0, totalCaidos = 0, maxCaer = 0;
-        let tiempo = 30, vel = 3, ultimoCubo = 0;
-
+        const canvas = document.getElementById("mundo"), ctx = canvas.getContext("2d");
+        let monedas = parseInt(localStorage.getItem("cs_v5")) || 0, lang = "es", activo = false, cubos = [], colorMeta = "", pts = 0, meta = 0, totalCaidos = 0, maxCaer = 0, tiempo = 30, vel = 3, ultimoCubo = 0;
         document.getElementById("val-monedas").innerText = monedas;
-
-        // --- SISTEMA DE IDIOMA REAL (CORREGIDO) ---
-        const textos = {
-            es: { lang:"IDIOMA: ESPAÑOL", f:"FÁCIL (10/20)", m:"MEDIO (25/35)", d:"DIFÍCIL (50/60)", shop:"🛒 TIENDA", obj:"OBJETIVO", win:"¡GANASTE!", lose:"¡PERDISTE!", back:"VOLVER", buy:"COMPRAR", time:"¡TIEMPO AGOTADO!" },
-            en: { lang:"LANGUAGE: ENGLISH", f:"EASY (10/20)", m:"MEDIUM (25/35)", d:"HARD (50/60)", shop:"🛒 SHOP", obj:"TARGET", win:"YOU WIN!", lose:"GAME OVER!", back:"BACK", buy:"BUY", time:"TIME OUT!" }
-        };
-
-        function cambiarIdioma() {
-            lang = lang === "es" ? "en" : "es";
-            const t = textos[lang];
-            document.getElementById("btn-lang").innerText = t.lang;
-            document.getElementById("txt-f").innerText = t.f;
-            document.getElementById("txt-m").innerText = t.m;
-            document.getElementById("txt-d").innerText = t.d;
-            document.getElementById("txt-t").innerText = t.shop;
-            document.getElementById("txt-obj").innerText = t.obj;
-            document.getElementById("tit-tienda").innerText = lang === "es" ? "TIENDA" : "SHOP";
-            document.getElementById("btn-volver").innerText = t.back;
-            document.getElementById("btn-comprar").innerText = t.buy;
-        }
-
+        const textos = { es: { lang:"IDIOMA: ESPAÑOL", f:"FÁCIL (10/20)", m:"MEDIO (25/35)", d:"DIFÍCIL (50/60)", shop:"🛒 TIENDA", obj:"OBJETIVO", win:"¡GANASTE!", lose:"¡PERDISTE!", back:"VOLVER", buy:"COMPRAR", time:"¡TIEMPO AGOTADO!" }, en: { lang:"LANGUAGE: ENGLISH", f:"EASY (10/20)", m:"MEDIUM (25/35)", d:"HARD (50/60)", shop:"🛒 SHOP", obj:"TARGET", win:"YOU WIN!", lose:"GAME OVER!", back:"BACK", buy:"BUY", time:"TIME OUT!" } };
+        function cambiarIdioma() { lang = lang === "es" ? "en" : "es"; const t = textos[lang]; document.getElementById("btn-lang").innerText = t.lang; document.getElementById("txt-f").innerText = t.f; document.getElementById("txt-m").innerText = t.m; document.getElementById("txt-d").innerText = t.d; document.getElementById("txt-t").innerText = t.shop; document.getElementById("txt-obj").innerText = t.obj; document.getElementById("tit-tienda").innerText = lang === "es" ? "TIENDA" : "SHOP"; document.getElementById("btn-volver").innerText = t.back; document.getElementById("btn-comprar").innerText = t.buy; }
         function abrirTienda() { document.getElementById("pantalla-tienda").style.display = "flex"; }
         function cerrarTienda() { document.getElementById("pantalla-tienda").style.display = "none"; }
-
-        function iniciar(nivel) {
-            document.getElementById("menu-inicio").style.display = "none";
-            document.getElementById("hud").style.display = "flex";
-            document.getElementById("reloj").style.display = "block";
-            canvas.style.display = "block";
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            
-            if(nivel === 'facil') { meta = 10; maxCaer = 20; vel = 4; }
-            if(nivel === 'medio') { meta = 25; maxCaer = 35; vel = 5.5; }
-            if(nivel === 'dificil') { meta = 50; maxCaer = 60; vel = 7; }
-
-            colorMeta = ["#FF3333", "#33FF33", "#3333FF", "#FFFF33"][Math.floor(Math.random()*4)];
-            document.getElementById("objetivo").style.background = colorMeta;
-            document.getElementById("t-puntos").innerText = "0 / " + meta;
-            
-            pts = 0; totalCaidos = 0; tiempo = 30; cubos = []; activo = true;
-            bucle(0);
-        }
-
-        function bucle(t) {
-            if(!activo) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            if(totalCaidos < maxCaer && t - ultimoCubo > 650) {
-                cubos.push({
-                    x: Math.random() * (canvas.width - 60), y: -60,
-                    c: Math.random() < 0.4 ? colorMeta : ["#FF3333", "#33FF33", "#3333FF", "#FFFF33"][Math.floor(Math.random()*4)],
-                    v: vel + Math.random() * 1.5
-                });
-                totalCaidos++;
-                ultimoCubo = t;
-            }
-
-            cubos.forEach((c, i) => {
-                c.y += c.v;
-                ctx.fillStyle = c.c;
-                ctx.fillRect(c.x, c.y, 60, 60);
-                if(c.y > canvas.height) {
-                    cubos.splice(i, 1);
-                    if(totalCaidos >= maxCaer && cubos.length === 0 && pts < meta) finalizar(textos[lang].lose);
-                }
-            });
-
-            document.getElementById("t-puntos").innerText = pts + " / " + meta;
-            document.getElementById("reloj").innerText = tiempo + "s";
-            requestAnimationFrame(bucle);
-        }
-
-        function tocar(e) {
-            if(!activo) return;
-            if(e.type === 'touchstart') e.preventDefault();
-            const x = e.clientX || e.touches[0].clientX;
-            const y = e.clientY || e.touches[0].clientY;
-
-            cubos.forEach((c, i) => {
-                if(x > c.x && x < c.x + 60 && y > c.y && y < c.y + 60) {
-                    if(c.c === colorMeta) {
-                        pts++; monedas++;
-                        document.getElementById("val-monedas").innerText = monedas;
-                        localStorage.setItem("cs_final_v5", monedas);
-                        cubos.splice(i, 1);
-                        if(pts >= meta) finalizar(textos[lang].win);
-                    }
-                }
-            });
-        }
-
-        window.addEventListener("mousedown", tocar);
-        window.addEventListener("touchstart", tocar, {passive: false});
-
-        function finalizar(m) {
-            activo = false;
-            setTimeout(() => { alert(m); location.reload(); }, 100);
-        }
-
-        setInterval(() => {
-            if(activo) {
-                tiempo--;
-                if(tiempo <= 0) finalizar(textos[lang].time);
-            }
-        }, 1000);
+        function iniciar(nivel) { document.getElementById("menu-inicio").style.display = "none"; document.getElementById("hud").style.display = "flex"; document.getElementById("reloj").style.display = "block"; canvas.style.display = "block"; canvas.width = window.innerWidth; canvas.height = window.innerHeight; if(nivel === 'facil') { meta = 10; maxCaer = 20; vel = 4; } if(nivel === 'medio') { meta = 25; maxCaer = 35; vel = 5.5; } if(nivel === 'dificil') { meta = 50; maxCaer = 60; vel = 7; } colorMeta = ["#FF3333", "#33FF33", "#3333FF", "#FFFF33"][Math.floor(Math.random()*4)]; document.getElementById("objetivo").style.background = colorMeta; document.getElementById("t-puntos").innerText = "0 / " + meta; pts = 0; totalCaidos = 0; tiempo = 30; cubos = []; activo = true; bucle(0); }
+        function bucle(t) { if(!activo) return; ctx.clearRect(0, 0, canvas.width, canvas.height); if(totalCaidos < maxCaer && t - ultimoCubo > 650) { cubos.push({ x: Math.random() * (canvas.width - 60), y: -60, c: Math.random() < 0.4 ? colorMeta : ["#FF3333", "#33FF33", "#3333FF", "#FFFF33"][Math.floor(Math.random()*4)], v: vel + Math.random() * 1.5 }); totalCaidos++; ultimoCubo = t; } cubos.forEach((c, i) => { c.y += c.v; ctx.fillStyle = c.c; ctx.fillRect(c.x, c.y, 60, 60); if(c.y > canvas.height) { cubos.splice(i, 1); if(totalCaidos >= maxCaer && cubos.length === 0 && pts < meta) finalizar(textos[lang].lose); } }); document.getElementById("t-puntos").innerText = pts + " / " + meta; document.getElementById("reloj").innerText = tiempo + "s"; requestAnimationFrame(bucle); }
+        function tocar(e) { if(!activo) return; if(e.type === 'touchstart') e.preventDefault(); const x = e.clientX || e.touches[0].clientX, y = e.clientY || e.touches[0].clientY; cubos.forEach((c, i) => { if(x > c.x && x < c.x + 60 && y > c.y && y < c.y + 60) { if(c.c === colorMeta) { pts++; monedas++; document.getElementById("val-monedas").innerText = monedas; localStorage.setItem("cs_v5", monedas); cubos.splice(i, 1); if(pts >= meta) finalizar(textos[lang].win); } } }); }
+        window.addEventListener("mousedown", tocar); window.addEventListener("touchstart", tocar, {passive: false});
+        function finalizar(m) { activo = false; setTimeout(() => { alert(m); location.reload(); }, 100); }
+        setInterval(() => { if(activo) { tiempo--; if(tiempo <= 0) finalizar(textos[lang].time); } }, 1000);
     </script>
 </body>
 </html>
